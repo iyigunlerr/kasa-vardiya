@@ -228,7 +228,8 @@ export default function CashierDashboard() {
     const parsedBanka = parseFloat(bank.replace(",", ".")) || 0;
     const devredilen = parsedSistem - parsedBanka;
     const totalKar = activeShift.total_profit_withdrawn ?? 0;
-    const fark = (activeShift.starting_cash - devredilen) - activeShift.total_commission - totalKar;
+    const beklenen = activeShift.starting_cash - activeShift.total_commission + totalKar + (activeShift.total_expenses || 0);
+    const fark = beklenen - devredilen;
     setDevredilenTotal(devredilen);
 
     if (Math.abs(fark) > 0.01) {
@@ -264,7 +265,7 @@ export default function CashierDashboard() {
   const totalExpenses = activeShift?.total_expenses ?? 0;
   const totalKar = activeShift?.total_profit_withdrawn ?? 0;
   const openingCash = activeShift?.starting_cash ?? 0;
-  const beklenenKasa = openingCash - totalCommission - totalKar;
+  const beklenenKasa = openingCash - totalCommission + totalKar + totalExpenses;
 
   if (loading || authLoading) {
     return (
@@ -295,12 +296,12 @@ export default function CashierDashboard() {
           <KPICard icon={TrendingUp} label="Devralınan Kom." value={prevCommission} sub="Önceki vardiyadan" variant="warning" />
           <KPICard icon={TrendingUp} label="Komisyon" value={totalCommission} sub="Bu vardiya" variant="success" delta={totalCommission > 0 ? 2.4 : 0} />
           <KPICard icon={CreditCard} label="Gider" value={totalExpenses} sub="Gün içi masraf" variant="danger" delta={totalExpenses > 0 ? -1.2 : 0} />
-          <KPICard icon={Wallet} label="Beklenen Kasa" value={beklenenKasa} sub="Açılış − Komisyon − Kâr" variant="success" />
+          <KPICard icon={Wallet} label="Beklenen Kasa" value={beklenenKasa} sub="Açılış − Kom. + Gider + Kâr" variant="success" />
         </section>
 
         {/* Main grid */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 mb-4">
-          <HandoverForm cash={cash} bank={bank} openingCash={openingCash} totalCommission={totalCommission} totalKar={totalKar} status={status}
+          <HandoverForm cash={cash} bank={bank} openingCash={openingCash} totalCommission={totalCommission} totalKar={totalKar} totalExpenses={totalExpenses} status={status}
             onCashChange={(v) => { setCash(v); setStatus("idle"); }} onBankChange={(v) => { setBank(v); setStatus("idle"); }}
             onCalculate={handleCalculate} onReset={handleReset} />
           <ActivityFeed transactions={transactions} onAdd={handleAddTransaction} />

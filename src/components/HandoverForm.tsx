@@ -2,8 +2,8 @@
 import { Banknote, Building2, CheckCircle2, ChevronRight, RefreshCw, RotateCcw, ShieldCheck } from "lucide-react";
 import { fmt } from "@/lib/format";
 
-export default function HandoverForm({ cash, bank, openingCash, totalCommission, totalKar, status, onCashChange, onBankChange, onCalculate, onReset }: {
-  cash: string; bank: string; openingCash: number; totalCommission: number; totalKar: number; status: "idle" | "success";
+export default function HandoverForm({ cash, bank, openingCash, totalCommission, totalKar, totalExpenses, status, onCashChange, onBankChange, onCalculate, onReset }: {
+  cash: string; bank: string; openingCash: number; totalCommission: number; totalKar: number; totalExpenses: number; status: "idle" | "success";
   onCashChange: (v: string) => void; onBankChange: (v: string) => void; onCalculate: () => void; onReset: () => void;
 }) {
   const parsedSistem = parseFloat(cash.replace(",", ".")) || 0;
@@ -11,13 +11,10 @@ export default function HandoverForm({ cash, bank, openingCash, totalCommission,
   const devredilen = parsedSistem - parsedBanka;
   const hasInput = cash !== "" || bank !== "";
 
-  // Fark = (Açılış - Devredilen) - Komisyon - Alınan Kar
-  // Positif = artı (kasadan fazla düşüş), Negatif = zarar
-  const liveFark = hasInput ? (openingCash - devredilen) - totalCommission - totalKar : null;
+  // Beklenen = Açılış - Komisyon + Gider + Alınan Kar
+  const beklenen = openingCash - totalCommission + totalKar + totalExpenses;
+  const liveFark = hasInput ? beklenen - devredilen : null;
   const liveMatch = liveFark !== null && Math.abs(liveFark) <= 0.01;
-
-  // Beklenen Kasa = Açılış - Komisyon - Alınan Kar
-  const beklenen = openingCash - totalCommission - totalKar;
 
   return (
     <div className="lg:col-span-2 rounded-2xl border border-border p-6" style={{ background: "var(--surface)" }}>
